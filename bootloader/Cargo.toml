@@ -1,0 +1,10 @@
+[package]
+name = "bootloader"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+linked_list_allocator = "0.10.5"
+log = { version = "0.4.27", features = ["max_level_trace"] }
+uefi = { version = "0.35.0", features = ["logger", "panic_handler", "alloc"] }
+widestring = { version = "1.2.0", default-features = false}
