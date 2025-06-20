@@ -1,1 +1,0 @@
-/home/cmh/Documents/Rust-Projects/sorix_os/target/x86_64-unknown-none/release/kernel: /home/cmh/Documents/Rust-Projects/sorix_os/kernel/src/drawing/characters.rs /home/cmh/Documents/Rust-Projects/sorix_os/kernel/src/drawing/mod.rs /home/cmh/Documents/Rust-Projects/sorix_os/kernel/src/font.psf /home/cmh/Documents/Rust-Projects/sorix_os/kernel/src/main.rs
