@@ -2,18 +2,21 @@ use crate::drawing::Color;
 
 pub static FONT: &[u8] = include_bytes!("../font.psf");
 
+#[allow(dead_code)]
 pub struct PSF1Header {
     pub magic: [u8; 2], // 0x36, 0x04
     pub mode: u8,
     pub glyph_height: u8,
 }
 
+#[allow(dead_code)]
 pub struct PSFData<'a> {
     header: PSF1Header,
     glyph_count: usize,
     glyphs: &'a [u8]
 }
 
+#[allow(dead_code)]
 impl<'a> PSFData<'a> {
     pub fn new(header: PSF1Header, count: usize, glyphs: &'a [u8]) -> PSFData<'a> {
         Self {
@@ -46,6 +49,7 @@ impl PSF1Header {
     }
 }
 
+#[allow(dead_code)]
 pub fn draw_char(
     fb: *mut u8,
     header: &PSF1Header,
@@ -58,7 +62,7 @@ pub fn draw_char(
 ) -> u8 {
     let char_size = header.glyph_height as usize; // Charsize (i.e. glyph height) is 16: VERIFIED
     let start = ascii_code as usize; // First byte
-    let end = start + char_size; // Last byte
+    let _end = start + char_size; // Last byte
     
     // Crashes after any number above 78
     let glyph_bytes = &glyphs[16..32];

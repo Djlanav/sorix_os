@@ -1,0 +1,1 @@
+cargo build --config "kernel/.cargo/config.toml" --release --target x86_64-unknown-none -p kernel

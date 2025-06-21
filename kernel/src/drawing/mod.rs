@@ -1,6 +1,7 @@
 pub mod characters;
 use crate::FramebufferInfo;
 
+#[allow(dead_code)]
 #[derive(Clone, Copy)]
 pub enum Color {
     Purple = 0x8b2ef5,

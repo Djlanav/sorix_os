@@ -1,22 +1,33 @@
 ENTRY(_start)
 
 SECTIONS {
-  . = 0x01400000;
+    /* Start at 20 MiB = 0x1400000 */
+    . = 0x1400000;
 
-  .text : {
-    *(.text*)
-  }
+    /* TEXT: Code section */
+    .text ALIGN(0x1000) : {
+        KEEP(*(.text._start))  /* Keep your _start symbol if needed */
+        *(.text .text.*)
+    }
 
-  .rodata : {
-    *(.rodata*)
-  }
+    /* RODATA: Read-only data, strings, consts */
+    .rodata ALIGN(0x1000) : {
+        *(.rodata .rodata.*)
+    }
 
-  .data : {
-    *(.data*)
-  }
+    /* DATA: Writable globals, statics */
+    .data ALIGN(0x1000) : {
+        *(.data .data.*)
+    }
 
-  .bss : {
-    *(.bss*)
-    *(COMMON)
-  }
+    /* BSS: Zero-initialized statics */
+    .bss ALIGN(0x1000) : {
+        __bss_start = .;
+        *(.bss .bss.* COMMON)
+        __bss_end = .;
+    }
+
+    /DISCARD/ : {
+        *(.eh_frame)  /* Optional: drop Rust’s panic unwind junk if unused */
+    }
 }
