@@ -13,9 +13,8 @@ use dir_management::*;
 use log::*;
 use uefi::{boot::{open_protocol_exclusive, MemoryDescriptor, MemoryType, PAGE_SIZE}, mem::memory_map::MemoryMap, prelude::*, proto::{console::gop::GraphicsOutput, media::file::File}};
 use linked_list_allocator::LockedHeap;
-use widestring::iter;
 
-use crate::utils::framebuffer::FramebufferInfo;
+use crate::{elf_loading::{ELFHeader, ELFIdentity}, utils::framebuffer::FramebufferInfo};
 
 #[global_allocator]
 static ALLOCATOR: LockedHeap = LockedHeap::empty();
@@ -78,10 +77,12 @@ fn main() -> Status {
     let mut fb = gop.frame_buffer();
     let fb_size = fb.size();
 
-    info!("Framebuffer width: {}", mode_info.resolution().0);
+    let fb_slice = unsafe {
+        core::slice::from_raw_parts_mut(fb.as_mut_ptr() as *mut u32, fb_size / 4)
+    };
 
     let fb_info = FramebufferInfo {
-        addr: fb.as_mut_ptr(),
+        buffer: fb_slice,
         size: fb_size,
         width: mode_info.resolution().0,
         height: mode_info.resolution().1,
@@ -109,6 +110,14 @@ fn parse_elf_and_load(data: &[u8]) -> Result<usize, ()> {
         error!("ELF FILE DOES NOT CONTAIN MAGIC HEADER. FAILED TO LOAD KERNEL");
         return Err(());
     }
+
+    let elf_header = match ELFHeader::make(data) {
+        Some(eh) => eh,
+        None => {
+            error!("Failed to make ELFHeader. Invalid header possbily provided. Cannot continue. Boot failed.");
+            return Err(());
+        }
+    };
 
     let e_entry = u64::from_le_bytes(data[24..32].try_into().unwrap()) as usize;
     let e_phoff = u64::from_le_bytes(data[32..40].try_into().unwrap()) as usize;
@@ -167,7 +176,6 @@ fn parse_elf_and_load(data: &[u8]) -> Result<usize, ()> {
 
         let dst_ptr = unsafe { dst.add(p_vaddr - mem_start) };
         unsafe {
-            //core::ptr::copy_nonoverlapping(data[p_offset..].as_ptr(), dst.as_ptr(), p_filesz);
             core::ptr::copy_nonoverlapping(data.as_ptr().add(p_offset), dst_ptr, p_filesz);
         }
 

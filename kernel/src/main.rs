@@ -1,25 +1,25 @@
-#![no_main]
 #![no_std]
+#![no_main]
 
 mod drawing;
+mod kernel;
 extern crate alloc;
 
-use alloc::vec::Vec;
-//use alloc::vec::Vec;
+use alloc::boxed::Box;
 use drawing::*;
 use linked_list_allocator::LockedHeap;
 
-use crate::drawing::characters::{PSF1Header, FONT};
+use crate::kernel::Kernel;
 
 #[global_allocator]
 static ALLOCATOR: LockedHeap = LockedHeap::empty();
 
-const HEAP_START: *mut u8 = 0x3f56000 as *mut u8; // Start Address
+const HEAP_START: *mut u8 = 0x3f56000 as *mut u8; // Start Address (DO. NOT. CHANGE.)
 const HEAP_SIZE: usize = 1024 * 1024; // 1 MB Heap
 
 #[repr(C)]
-pub struct FramebufferInfo {
-    pub addr: *mut u8,
+pub struct FramebufferInfo<'a> {
+    pub buffer: &'a mut [u32],
     pub size: usize,
     pub width: usize,
     pub height: usize,
@@ -35,24 +35,17 @@ pub fn kernel_heap_init() {
 #[unsafe(no_mangle)]
 pub extern "sysv64" fn _start(fb_info: *mut FramebufferInfo) -> ! {
     kernel_heap_init();
-    let fb = unsafe { &*fb_info };
-    kernel_fill_screen(fb, Color::Purple);
-
-    let psf_header = PSF1Header::init();
-    let _count = if psf_header.mode & 0x01 != 0 {
-        512 as usize
-    } else {
-        256 as usize
+    let fb_box = unsafe {
+        Box::from_raw(fb_info)
     };
-    // Note to self: Ask ChatGPT about setting up potential heap memory allocation for the kernel
-    let _glyph_data = &FONT[4..];
-    let mut vec = Vec::new();
-    vec.push(1);
-    vec.push(2);
+
+    let mut kernel = Kernel::start(fb_box);
+    kernel.fill_screen(Color::Purple);
 
     loop {}
 }
 
+#[cfg(not(test))]
 #[panic_handler]
 fn panic(_info: &core::panic::PanicInfo) -> ! {
     loop {}
