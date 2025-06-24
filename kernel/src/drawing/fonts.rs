@@ -64,7 +64,21 @@ pub fn draw_char(
     }
 }
 
-pub fn draw_string(fb: &mut FramebufferInfo, font: &PsfFont, text: &mut str, x: usize, y: usize, color: Color) {
+pub fn draw_string(fb: &mut FramebufferInfo, font: &PsfFont, text: &str, x: usize, y: usize, color: Color) {
+    let mut x_offset = x;
+    
+    for byte in text.bytes() {
+        if byte == b'\n' {
+            x_offset = x;
+            continue;
+        }
+
+        draw_char(fb, font, byte, x_offset, y, color);
+        x_offset += 8;
+    }
+}
+
+pub fn draw_string_raw(fb: &mut FramebufferInfo, font: &PsfFont, text: &str, x: usize, y: usize, color: Color) {
     let mut x_offset = x;
     
     for byte in text.bytes() {

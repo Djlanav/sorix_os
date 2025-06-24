@@ -23,6 +23,6 @@ impl Kernel<'_> {
     }
 
     pub fn fill_screen(&mut self, color: Color) {
-        self.draw_area(800, 600, color);
+        self.draw_area(self.framebuffer.width, self.framebuffer.height, color);
     }
 }

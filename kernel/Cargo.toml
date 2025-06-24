@@ -4,5 +4,5 @@ version = "0.1.0"
 edition = "2024"
 
 [dependencies]
-bumpalo = "3.18.1"
+bumpalo = { version = "3.18.1", features = ["boxed", "collections"] }
 linked_list_allocator = "0.10.5"

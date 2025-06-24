@@ -5,11 +5,13 @@ mod drawing;
 mod kernel;
 extern crate alloc;
 
+use core::cell::LazyCell;
+
 use alloc::boxed::Box;
 use drawing::*;
 use linked_list_allocator::LockedHeap;
 
-use crate::{drawing::fonts::{draw_char, draw_string, PsfFont}, kernel::{string_api::Shell, Kernel}};
+use crate::{drawing::fonts::{draw_char, draw_string, draw_string_raw, PsfFont}, kernel::{string_api::Shell, Kernel}};
 
 #[global_allocator]
 static ALLOCATOR: LockedHeap = LockedHeap::empty();
@@ -45,7 +47,14 @@ pub extern "sysv64" fn _start(fb_info: *mut FramebufferInfo) -> ! {
     let mut kernel = Kernel::start(fb_box, shell);
     kernel.fill_screen(Color::Black);
 
-    kernel.println("=== Welcome to SORIX OS!\n");
+    kernel.println("=== WELCOME TO SORIX OS ===");
+
+    for _i in 0..5 {
+        kernel.println("");
+    }
+
+    kernel.println("No drives found. Are there any drivers implemented yet?");
+    kernel.println("Hello World!");
 
     loop {}
 }

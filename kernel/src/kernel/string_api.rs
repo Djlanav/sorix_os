@@ -1,38 +1,25 @@
-use core::marker::PhantomData;
-
-use alloc::vec::Vec;
+use bumpalo::collections;
 use bumpalo::Bump;
 
-pub struct Shell<'a> {
+// Terminal offsets
+//pub static mut X_OFFSET_SHELL: usize = 0;
+pub static mut Y_OFFSET_SHELL: usize = 0;
+
+type BumpString<'a> = collections::String<'a>;
+
+pub struct Shell {
     bump: Bump,
-    pub x_offset: usize,
-    pub y_offset: usize,
-    phantom: PhantomData<&'a u8>
 }
 
-impl<'a> Shell<'a> {
+impl Shell {
     pub fn new() -> Self {
         Self {
-            bump: Bump::new(),
-            x_offset: 0,
-            y_offset: 0,
-            phantom: PhantomData
+            bump: Bump::with_capacity(5024),
         }
     }
 
-    pub fn write(&'a mut self, src: &'a str) -> &'a mut str {
-        let src_bytes = src.as_bytes();
-        if src_bytes[src.len()] == b'\n' {
-            self.y_offset += 5;
-        }
-
-        let string = self.bump.alloc_str(src);
+    pub fn write(&self, src: &str) -> BumpString {
+        let string = BumpString::from_str_in(src, &self.bump);
         string
     }
-}
-
-fn t() {
-    let mut v = Vec::new();
-    v.push(1);
-    v.push(4);
 }
