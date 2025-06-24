@@ -1,6 +1,7 @@
 #![feature(asm)]
-
 use core::arch::asm;
+
+use crate::kprintln;
 
 const PCI_CONFIG_SPACE_START: u64 = 0x0000_0000;
 const PCI_DEVICE_COUNT: usize = 32 * 8 * 256; // bus * device * function
@@ -42,7 +43,21 @@ pub fn scan_pci_for_virtio_block() {
         if vendor_id == 0xFFFF {
             continue;
         }
+
+        kprintln!(
+            "PCI Device at 0:{}.0 -> Vendor ID: {:04x}, Device ID: {:04x}",
+            device,
+            vendor_id,
+            device_id
+        );
+
+        if vendor_id == 0x1AF4 && device_id == 0x1042 {
+            kprintln!("Found VirtIO Block Device at 0:{}:0", device);
+            return;
+        }
     }
+
+    kprintln!("Could not find VirtIO Block Device!");
 }
 
 #[inline]

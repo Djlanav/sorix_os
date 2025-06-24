@@ -1,5 +1,6 @@
 pub mod fonts;
 
+use crate::{kprintln, KERNEL_EVENT_MANAGER, kernel::EventType, alloc::string::ToString};
 use crate::kernel::Kernel;
 
 #[allow(dead_code)]
@@ -25,4 +26,8 @@ impl Kernel<'_> {
     pub fn fill_screen(&mut self, color: Color) {
         self.draw_area(self.framebuffer.width, self.framebuffer.height, color);
     }
+}
+
+pub fn print_test() {
+    kprintln!("Testing here! In drawing module! Some value: {}", 15);
 }
