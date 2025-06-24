@@ -1,3 +1,5 @@
+use core::borrow::Borrow;
+
 use alloc::vec::Vec;
 use log::*;
 use num_enum::{IntoPrimitive, TryFromPrimitive};
@@ -211,7 +213,8 @@ impl ELFIdentity {
 pub struct ProgramHeader {
     pub p_type: ProgramHeaderType,
     pub offset: usize,
-    pub virtual_addr: usize,
+    pub aligned_vaddr: usize,
+    pub non_aligned_vaddr: usize,
     pub physical_addr: usize,
     pub file_size: usize,
     pub memory_size: usize,
@@ -224,20 +227,21 @@ impl ProgramHeader {
         let p_type = Self::get_type(elf_data, ph_offset, phentry_size, index);
         if let ProgramHeaderType::Load = p_type {
             let offset = u64::from_le_bytes(elf_data[ph_offset + 8..ph_offset + 16].try_into().unwrap()) as usize;
-            let virtual_addr = u64::from_le_bytes(elf_data[ph_offset + 16..ph_offset + 24].try_into().unwrap()) as usize;
+            let non_vaddr = u64::from_le_bytes(elf_data[ph_offset + 16..ph_offset + 24].try_into().unwrap()) as usize;
             let physical_addr = u64::from_le_bytes(elf_data[ph_offset + 24..ph_offset + 32].try_into().unwrap()) as usize;
             let file_size = u64::from_le_bytes(elf_data[ph_offset + 32..ph_offset + 40].try_into().unwrap()) as usize;
             let memory_size = u64::from_le_bytes(elf_data[ph_offset + 40..ph_offset + 48].try_into().unwrap()) as usize;
 
             // Alignment
-            let virtual_addr = virtual_addr & !(PAGE_SIZE - 1);
-            let vaddr_end = (virtual_addr + memory_size + PAGE_SIZE - 1) & !(PAGE_SIZE - 1);
-            let page_count = (vaddr_end - virtual_addr) / PAGE_SIZE;
+            let aligned_vaddr = non_vaddr & !(PAGE_SIZE - 1);
+            let vaddr_end = (non_vaddr + memory_size + PAGE_SIZE - 1) & !(PAGE_SIZE - 1);
+            let page_count = (vaddr_end - aligned_vaddr) / PAGE_SIZE;
             
             return Some(Self {
                 p_type,
                 offset,
-                virtual_addr,
+                aligned_vaddr: aligned_vaddr,
+                non_aligned_vaddr: physical_addr,
                 physical_addr,
                 file_size,
                 memory_size,

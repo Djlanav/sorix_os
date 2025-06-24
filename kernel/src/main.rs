@@ -9,13 +9,15 @@ use alloc::boxed::Box;
 use drawing::*;
 use linked_list_allocator::LockedHeap;
 
-use crate::kernel::Kernel;
+use crate::{drawing::fonts::{draw_char, draw_string, PsfFont}, kernel::{string_api::Shell, Kernel}};
 
 #[global_allocator]
 static ALLOCATOR: LockedHeap = LockedHeap::empty();
 
 const HEAP_START: *mut u8 = 0x3f56000 as *mut u8; // Start Address (DO. NOT. CHANGE.)
 const HEAP_SIZE: usize = 1024 * 1024; // 1 MB Heap
+
+const MAIN_FONT: &[u8] = include_bytes!("drawing/font.psf");
 
 #[repr(C)]
 pub struct FramebufferInfo<'a> {
@@ -39,8 +41,11 @@ pub extern "sysv64" fn _start(fb_info: *mut FramebufferInfo) -> ! {
         Box::from_raw(fb_info)
     };
 
-    let mut kernel = Kernel::start(fb_box);
-    kernel.fill_screen(Color::Purple);
+    let shell = Shell::new();
+    let mut kernel = Kernel::start(fb_box, shell);
+    kernel.fill_screen(Color::Black);
+
+    kernel.println("=== Welcome to SORIX OS!\n");
 
     loop {}
 }

@@ -20,6 +20,11 @@ SECTIONS {
         *(.data .data.*)
     }
 
+    /* GOT: Global offset table */
+    .got ALIGN(0x1000) : {
+        *(.got .got.*)
+    }
+
     /* BSS: Zero-initialized statics */
     .bss ALIGN(0x1000) : {
         __bss_start = .;

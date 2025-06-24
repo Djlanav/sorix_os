@@ -14,7 +14,7 @@ use log::*;
 use uefi::{boot::{open_protocol_exclusive, MemoryDescriptor, MemoryType, PAGE_SIZE}, mem::memory_map::MemoryMap, prelude::*, proto::{console::gop::GraphicsOutput, media::file::File}};
 use linked_list_allocator::LockedHeap;
 
-use crate::{elf_loading::{ELFHeader, ELFIdentity}, utils::framebuffer::FramebufferInfo};
+use crate::{elf_loading::{ELFHeader, ELFIdentity, ProgramHeader}, utils::framebuffer::FramebufferInfo};
 
 #[global_allocator]
 static ALLOCATOR: LockedHeap = LockedHeap::empty();
@@ -111,19 +111,6 @@ fn parse_elf_and_load(data: &[u8]) -> Result<usize, ()> {
         return Err(());
     }
 
-    let elf_header = match ELFHeader::make(data) {
-        Some(eh) => eh,
-        None => {
-            error!("Failed to make ELFHeader. Invalid header possbily provided. Cannot continue. Boot failed.");
-            return Err(());
-        }
-    };
-
-    let e_entry = u64::from_le_bytes(data[24..32].try_into().unwrap()) as usize;
-    let e_phoff = u64::from_le_bytes(data[32..40].try_into().unwrap()) as usize;
-    let e_phentsize = u16::from_le_bytes(data[54..56].try_into().unwrap()) as usize;
-    let e_phnum = u16::from_le_bytes(data[56..58].try_into().unwrap()) as usize;
-
     let mmap = boot::memory_map(MemoryType::LOADER_DATA).expect("Failed to get memory map");
     let mmap_iter = mmap.entries();
     let mut mmap_vec = Vec::new();
@@ -140,6 +127,12 @@ fn parse_elf_and_load(data: &[u8]) -> Result<usize, ()> {
     };
 
     let mut allocated_regions = alloc::collections::BTreeSet::new();
+
+    
+    let e_entry = u64::from_le_bytes(data[24..32].try_into().unwrap()) as usize;
+    let e_phoff = u64::from_le_bytes(data[32..40].try_into().unwrap()) as usize;
+    let e_phentsize = u16::from_le_bytes(data[54..56].try_into().unwrap()) as usize;
+    let e_phnum = u16::from_le_bytes(data[56..58].try_into().unwrap()) as usize;
 
     for i in 0..e_phnum {
         let ph_offset = e_phoff + i * e_phentsize;
@@ -161,15 +154,15 @@ fn parse_elf_and_load(data: &[u8]) -> Result<usize, ()> {
             info!("Already allocated at {:#x}. Skipping.", mem_start);
             mem_start as *mut u8
         } else {
+            debug!(
+                "Segment @ p_vaddr={:#x}, mem_start={:#x}, pages={}, filesz={:#x}, memsz={:#x}",
+                p_vaddr, mem_start, page_count, p_filesz, p_memsz
+            );
             let pages = uefi::boot::allocate_pages(
             boot::AllocateType::Address(mem_start.try_into().unwrap()), 
             MemoryType::LOADER_DATA, 
             page_count).expect("UEFI failed to allocate pages"); // TODO: Fix cant find pages
             allocated_regions.insert(mem_start);
-            debug!(
-                "Segment @ p_vaddr={:#x}, mem_start={:#x}, pages={}, filesz={:#x}, memsz={:#x}",
-                p_vaddr, mem_start, page_count, p_filesz, p_memsz
-            );
 
             pages.as_ptr()
         };
