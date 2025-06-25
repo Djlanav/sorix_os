@@ -1,6 +1,7 @@
 #![no_main]
 #![no_std]
 
+mod pci_management;
 mod dir_management;
 mod utils;
 mod elf_loading;
@@ -14,7 +15,7 @@ use log::*;
 use uefi::{boot::{open_protocol_exclusive, MemoryDescriptor, MemoryType, PAGE_SIZE}, mem::memory_map::MemoryMap, prelude::*, proto::{console::gop::GraphicsOutput, media::file::File}};
 use linked_list_allocator::LockedHeap;
 
-use crate::{elf_loading::{ELFHeader, ELFIdentity, ProgramHeader}, utils::framebuffer::FramebufferInfo};
+use crate::utils::framebuffer::FramebufferInfo;
 
 #[global_allocator]
 static ALLOCATOR: LockedHeap = LockedHeap::empty();

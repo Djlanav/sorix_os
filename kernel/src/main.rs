@@ -10,7 +10,7 @@ use drawing::*;
 use linked_list_allocator::LockedHeap;
 
 use crate::kernel::{string_api::Shell, Kernel};
-use crate::kernel::prelude::*;
+use crate::kernel::{pci, prelude::*};
 
 #[global_allocator]
 static ALLOCATOR: LockedHeap = LockedHeap::empty();
@@ -46,10 +46,8 @@ pub extern "sysv64" fn _start(fb_info: *mut FramebufferInfo) -> ! {
     let mut kernel = Kernel::start(fb_box, shell);
     kernel.fill_screen(Color::Black);
 
-    kernel.println("=== WELCOME TO SORIX OS ===");
-    kernel.println("EventManager Started");
-
-    drawing::print_test();
+    pci::scan_pci_devices();
+    pci::scan_pci_for_ahci();
     KERNEL_EVENT_MANAGER.lock().run(&mut kernel);
     KERNEL_EVENT_MANAGER.lock().clean_events();
     

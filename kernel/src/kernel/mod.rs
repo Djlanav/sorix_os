@@ -1,12 +1,13 @@
 pub mod string_api;
-pub mod pci;
 pub mod prelude;
+pub mod pci;
 
 use alloc::vec::Vec;
 use alloc::{boxed::Box, string::String};
 use alloc::collections::BTreeMap;
 use crate::{drawing::{fonts::{draw_string, PsfFont}, Color}, kernel::string_api::{Shell, Y_OFFSET_SHELL}, FramebufferInfo, MAIN_FONT};
 
+#[allow(dead_code)]
 pub enum EventType {
     PrintLine(String),
 }

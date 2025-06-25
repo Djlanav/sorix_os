@@ -1,6 +1,5 @@
 pub mod fonts;
 
-use crate::{kprintln, KERNEL_EVENT_MANAGER, kernel::EventType, alloc::string::ToString};
 use crate::kernel::Kernel;
 
 #[allow(dead_code)]
@@ -28,6 +27,6 @@ impl Kernel<'_> {
     }
 }
 
-pub fn print_test() {
-    kprintln!("Testing here! In drawing module! Some value: {}", 15);
-}
+// pub fn print_test() {
+//     kprintln!("Testing here! In drawing module! Some value: {}", 15);
+// }
