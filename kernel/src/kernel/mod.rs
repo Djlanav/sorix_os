@@ -1,6 +1,8 @@
 pub mod string_api;
 pub mod prelude;
 pub mod pci;
+pub mod ahci;
+pub mod page_heap;
 
 use alloc::vec::Vec;
 use alloc::{boxed::Box, string::String};

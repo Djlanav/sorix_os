@@ -9,9 +9,8 @@ use alloc::boxed::Box;
 use drawing::*;
 use linked_list_allocator::LockedHeap;
 
-use crate::kernel::pci::{ahci_probe_port_type, find_ahci_device};
 use crate::kernel::{string_api::Shell, Kernel};
-use crate::kernel::{pci, prelude::*};
+use crate::kernel::{ahci, pci, prelude::*};
 
 #[global_allocator]
 static ALLOCATOR: LockedHeap = LockedHeap::empty();
@@ -48,7 +47,13 @@ pub extern "sysv64" fn _start(fb_info: *mut FramebufferInfo) -> ! {
     kernel.fill_screen(Color::Black);
 
     pci::scan_pci_devices();
-    pci::scan_pci_for_ahci();
+    if let Some(hba) = ahci::scan_pci_for_ahci() {
+        if let Some(port_index) = ahci::find_ahci_device(&hba) {
+            let port = hba.ports[port_index].clone();
+            ahci::stop_command_engine(port.clone());
+            ahci::initialize_port(port.clone());
+        }
+    }
 
     KERNEL_EVENT_MANAGER.lock().run(&mut kernel);
     KERNEL_EVENT_MANAGER.lock().clean_events();
