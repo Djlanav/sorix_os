@@ -9,6 +9,7 @@ use alloc::boxed::Box;
 use drawing::*;
 use linked_list_allocator::LockedHeap;
 
+use crate::kernel::pci::{ahci_probe_port_type, find_ahci_device};
 use crate::kernel::{string_api::Shell, Kernel};
 use crate::kernel::{pci, prelude::*};
 
@@ -16,7 +17,7 @@ use crate::kernel::{pci, prelude::*};
 static ALLOCATOR: LockedHeap = LockedHeap::empty();
 
 const HEAP_START: *mut u8 = 0x3f56000 as *mut u8; // Start Address (DO. NOT. CHANGE.)
-const HEAP_SIZE: usize = 1024 * 1024; // 1 MB Heap
+const HEAP_SIZE: usize = 1024usize.pow(2); // 1 MB Heap
 
 const MAIN_FONT: &[u8] = include_bytes!("drawing/font.psf");
 
@@ -48,6 +49,7 @@ pub extern "sysv64" fn _start(fb_info: *mut FramebufferInfo) -> ! {
 
     pci::scan_pci_devices();
     pci::scan_pci_for_ahci();
+
     KERNEL_EVENT_MANAGER.lock().run(&mut kernel);
     KERNEL_EVENT_MANAGER.lock().clean_events();
     

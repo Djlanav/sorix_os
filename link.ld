@@ -2,7 +2,7 @@ ENTRY(_start)
 
 SECTIONS {
     /* Start at 20 MiB = 0x1400000 */
-    . = 0x1400000;
+    . = 0x100000;
 
     /* TEXT: Code section */
     .text ALIGN(0x1000) : {

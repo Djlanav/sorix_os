@@ -1,7 +1,6 @@
 #![no_main]
 #![no_std]
 
-mod pci_management;
 mod dir_management;
 mod utils;
 mod elf_loading;
