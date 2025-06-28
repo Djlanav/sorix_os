@@ -1,4 +1,6 @@
 use core::arch::asm;
+use crate::alloc::string::ToString;
+
 use crate::kprintln;
 
 pub fn pci_read_config(bus: u8, device: u8, function: u8, offset: u8) -> u32 {
@@ -14,7 +16,6 @@ pub fn pci_read_config(bus: u8, device: u8, function: u8, offset: u8) -> u32 {
 }
 
 pub fn scan_pci_devices() {
-    kprintln!("Scanning PCI Devices");
     for device in 0..32 {
         let value = pci_read_config(0, device, 0, 0x0);
 

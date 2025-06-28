@@ -1,10 +1,13 @@
+pub mod cmd_management;
+
 use core::cell::RefCell;
-use core::ptr::{read_volatile, write_bytes};
+use core::ptr::read_volatile;
+use crate::alloc::string::ToString;
 
 use alloc::rc::Rc;
 use alloc::vec::Vec;
 use alloc::boxed::Box;
-use crate::kernel::page_heap::allocate_page;
+use crate::kernel::page_heap::{self, allocate_page};
 use crate::kprintln;
 use crate::kernel::pci::*;
 
@@ -142,6 +145,7 @@ fn read_hba_ports_volatile(mmio: u32) -> Rc<RefCell<HbaPort>>{
     port_rc
 }
 
+#[allow(unused_assignments)]
 pub fn scan_pci_for_ahci() -> Option<Box<HbaMem>> {
     let mut found = false;
 
@@ -242,8 +246,6 @@ pub fn initialize_port(port_rc: Rc<RefCell<HbaPort>>) {
     port.fb = fb as u32;
     port.fbu = (fb as u64 >> 32) as u32;
 
-    unsafe {
-        write_bytes(clb, 0, 1024);
-        write_bytes(fb, 0, 256);
-    }
+    page_heap::zero_page(clb, 1024.into());
+    page_heap::zero_page(fb, 256.into());
 }

@@ -1,3 +1,5 @@
+use core::ops::Add;
+
 use crate::{drawing::Color, FramebufferInfo};
 
 #[derive(Debug)]
@@ -79,17 +81,17 @@ pub fn draw_string(fb: &mut FramebufferInfo, font: &PsfFont, text: &str, x: usiz
     }
 }
 
-// pub fn draw_string_raw(fb: &mut FramebufferInfo, font: &PsfFont, text: &str, x: usize, y: &mut usize, color: Color) {
-//     let mut x_offset = x;
-//     *y = y.add(15);
+pub fn draw_string_raw(fb: &mut FramebufferInfo, font: &PsfFont, text: &str, x: usize, y: &mut usize, color: Color) {
+    let mut x_offset = x;
+    *y = y.add(15);
     
-//     for byte in text.bytes() {
-//         if byte == b'\n' {
-//             x_offset = x;
-//             continue;
-//         }
+    for byte in text.bytes() {
+        if byte == b'\n' {
+            x_offset = x;
+            continue;
+        }
 
-//         draw_char(fb, font, byte, x_offset, *y, color);
-//         x_offset += 8;
-//     }
-// }
+        draw_char(fb, font, byte, x_offset, *y, color);
+        x_offset += 8;
+    }
+}

@@ -4,8 +4,9 @@ use bumpalo::Bump;
 //use crate::{kprintln, KERNEL_EVENT_MANAGER, kernel::KernelEvent, alloc::string::ToString};
 
 // Terminal offsets
-//pub static mut X_OFFSET_SHELL: usize = 0;
+pub static mut X_OFFSET_SHELL: usize = 0;
 pub static mut Y_OFFSET_SHELL: usize = 0;
+pub static mut ONE_LINE_LENGTH: usize = 0;
 
 type BumpString<'a> = collections::String<'a>;
 
